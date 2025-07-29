@@ -9,6 +9,7 @@ def extract_frames(video_dir, output_dir):
     :param video_dir: Path to the directory containing video files.
     :param output_dir: Folder where extracted frames will be saved.
     """
+    os.makedirs(output_dir, exist_ok=True)
     for filename in os.listdir(video_dir):
         if not filename.endswith(".mp4"):
             continue
@@ -36,5 +37,4 @@ if __name__ == "__main__":
 
     video_dir = "traco_2024/training"
     output_dir = "data/frames"
-    os.makedirs(output_dir, exist_ok=True)
     extract_frames(video_dir, output_dir)
