@@ -6,8 +6,8 @@ def extract_frames(video_dir, output_dir):
     """
     Extract frames from a video file and save them as images.
 
-    :param video_path: Path to the video file.
-    :param output_folder: Folder where extracted frames will be saved.
+    :param video_dir: Path to the directory containing video files.
+    :param output_dir: Folder where extracted frames will be saved.
     """
     for filename in os.listdir(video_dir):
         if not filename.endswith(".mp4"):
