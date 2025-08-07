@@ -310,7 +310,7 @@ class BoundingBoxBody:
             # Save missing frames
             if len(missing_data) > 0:
                 with open(
-                    "../../data/original_data/missing_frames.txt",
+                    f"{self.annotation_dir_path}/missing_frames.txt",
                     "w",
                     encoding="utf-8",
                 ) as f:

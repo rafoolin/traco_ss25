@@ -1,35 +1,37 @@
 import argparse
 import os
+import logging
+
 from preprocess.extract_frames import extract_frames
 from preprocess.bounding_box_body import BoundingBoxBody
+from utils.logger import setup_logger
 
-COLOR = "\033[1;33m"
-RESET = "\033[0m"
+logger = setup_logger(level=logging.INFO)
 
 
 def run_pipeline(args: argparse.Namespace):
-    frame_dir_path = f"{args.data_dir}/frames"
+    frame_dir_path = "{args.data_dir}/frames"
     # Run the pipeline steps
-    print(f"{COLOR}Starting pipeline...{RESET}")
+    logger.info("Starting pipeline...")
     # Step 1: Extract frames from videos
-    print(f"{COLOR}Extracting frames...{RESET}")
+    logger.info("Extracting frames...")
     if os.path.exists(frame_dir_path):
-        print(f"{COLOR}Frame directory already exists. Skipping extraction.{RESET}")
+        logger.info("Frame directory already exists. Skipping extraction.")
     else:
         extract_frames(video_dir=args.video_dir, output_dir=frame_dir_path)
-        print(f"{COLOR}Frames extracted successfully!{RESET}")
+        logger.info("Frames extracted successfully!")
     # Step 2: Run bounding box script for body detection
-    print(f"{COLOR}Running bounding box body script...{RESET}")
+    logger.info("Running bounding box body script...")
     bbox_body = BoundingBoxBody(
         frame_dir_path=frame_dir_path,
         csv_dir_path=args.csv_dir,
         data_dir_path=args.data_dir,
-        yolo_dir_path=f"{args.data_dir}/yolo_labels_body",
+        yolo_dir_path="{args.data_dir}/yolo_labels_body",
     )
     bbox_body.generate_bounding_boxes_body()
-    print(f"{COLOR}Bounding box body script executed successfully!{RESET}")
+    logger.info("Bounding box body script executed successfully!")
     # Step 3: Run bounding box script for head detection
-    print(f"{COLOR}Pipeline completed successfully!{RESET}")
+    logger.info("Pipeline completed successfully!")
 
 
 if __name__ == "__main__":
