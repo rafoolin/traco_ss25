@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 from sam2.build_sam import build_sam2
+from utils.logger import setup_logger
+
+logger = setup_logger()
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 
 class BoundingBoxBody:
@@ -36,8 +40,7 @@ class BoundingBoxBody:
             current_device = torch.device("mps")
         else:
             current_device = torch.device("cpu")
-        print(f"using device: {current_device}")
-
+        logger.info("using device: %s", current_device)
         if current_device.type == "cuda":
             # use bfloat16 for the entire notebook
             torch.autocast("cuda", dtype=torch.bfloat16).__enter__()
@@ -46,7 +49,7 @@ class BoundingBoxBody:
                 torch.backends.cuda.matmul.allow_tf32 = True
                 torch.backends.cudnn.allow_tf32 = True
             elif current_device.type == "mps":
-                print(
+                logger.warning(
                     "\nSupport for MPS devices is preliminary. SAM 2 is trained with CUDA and might "
                     "give numerically different outputs and sometimes degraded performance on MPS. "
                     "See e.g. https://github.com/pytorch/pytorch/issues/84936 for a discussion."
@@ -101,7 +104,7 @@ class BoundingBoxBody:
         """
         hexbug_points = []
         for hexbug_data in hexbugs:
-            x, y, hexbug = hexbug_data["y"], hexbug_data["x"], hexbug_data["hexbug"]
+            x, y, hexbug = hexbug_data["x"], hexbug_data["y"], hexbug_data["hexbug"]
             if not np.isnan(x) and not np.isnan(y):
                 hexbug_points.append({"x": int(x), "y": int(y), "hexbug": hexbug})
         return hexbug_points
@@ -202,7 +205,7 @@ class BoundingBoxBody:
             # Bounding box
             bbox = self._get_mask_bounding_box(mask)
             if bbox is None:
-                print(f" -No bounding box for hexbug {hexbug} at ({x}, {y})")
+                logger.info(" -No bounding box for hexbug %s at (%f, %f)", hexbug, x, y)
                 continue
             (x_min, y_min), (x_max, y_max) = bbox
             draw.rectangle([(x_min, y_min), (x_max, y_max)], outline="yellow", width=5)
@@ -223,8 +226,8 @@ class BoundingBoxBody:
         ]
 
         all_videos = sorted(os.listdir(self.frame_dir_path))
-        for video_name in all_videos:
-            print(f"Processing video: {video_name}")
+        for video_name in ["training020"]:
+            logger.info("Processing video: %s", video_name)
             frame_path = os.path.join(self.frame_dir_path, video_name)
             csv_path = os.path.join(self.csv_dir_path, f"{video_name}.csv")
             yolo_data = []
@@ -234,7 +237,7 @@ class BoundingBoxBody:
             if not os.path.isdir(frame_path):
                 continue
             for frame_img in all_frames:
-                print(f"  -Processing frame: {frame_img}")
+                logger.info("Processing frame: %s", frame_img)
                 if not frame_img.endswith(".jpg"):
                     continue
 
@@ -247,7 +250,10 @@ class BoundingBoxBody:
                 csv_data = self._read_csv_frames(csv_path)
                 if frame_index not in csv_data:
                     missing_data.append(frame_index)
-                    print(f"  -No data for frame {frame_index} in CSV, skipping...")
+                    logger.info(
+                        "No data for frame %d in CSV, skipping...",
+                        frame_index,
+                    )
                     continue
                 mask_list = self._get_frame_masks(csv_data, frame_index)
                 # print(f"  -Number of masks predicted: {len(mask_list)}")
@@ -306,7 +312,7 @@ class BoundingBoxBody:
                     f.write(
                         f"{row[0]} {row[1]} {row[2]:.6f} {row[3]:.6f} {row[4]:.6f} {row[5]:.6f} {row[6]:.6f} {row[7]:.6f} {row[8]}\n"
                     )
-            print(f"  -YOLO label saved to {yolo_label_path}")
+            logger.info("YOLO label saved to %s", yolo_label_path)
             # Save missing frames
             if len(missing_data) > 0:
                 with open(

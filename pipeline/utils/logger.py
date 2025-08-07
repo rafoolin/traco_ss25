@@ -21,8 +21,9 @@ class ColorFormatter(logging.Formatter):
 
 
 def setup_logger(level=logging.INFO) -> logging.Logger:
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("tracker_logger")
     logger.setLevel(level)
+    logger.propagate = False
 
     if not logger.handlers:
         handler = logging.StreamHandler()

@@ -6,7 +6,7 @@ from preprocess.extract_frames import extract_frames
 from preprocess.bounding_box_body import BoundingBoxBody
 from utils.logger import setup_logger
 
-logger = setup_logger(level=logging.INFO)
+logger = setup_logger()
 
 
 def run_pipeline(args: argparse.Namespace):
