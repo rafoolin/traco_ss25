@@ -85,5 +85,6 @@ info "Running pipeline script..."
 python pipeline/pipeline.py \
 --video_dir "./traco_2024/training" \
 --csv_dir "./traco_2024/training" \
---data_dir "./data" || error "Pipeline script failed."
+--data_dir "./data" \
+--yolo_db_dir "./data/yolo_dataset" || error "Pipeline script failed."
 info "Pipeline executed successfully."
