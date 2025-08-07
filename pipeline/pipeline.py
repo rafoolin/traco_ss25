@@ -10,7 +10,7 @@ logger = setup_logger(level=logging.INFO)
 
 
 def run_pipeline(args: argparse.Namespace):
-    frame_dir_path = "{args.data_dir}/frames"
+    frame_dir_path = f"{args.data_dir}/frames"
     # Run the pipeline steps
     logger.info("Starting pipeline...")
     # Step 1: Extract frames from videos
@@ -26,7 +26,7 @@ def run_pipeline(args: argparse.Namespace):
         frame_dir_path=frame_dir_path,
         csv_dir_path=args.csv_dir,
         data_dir_path=args.data_dir,
-        yolo_dir_path="{args.data_dir}/yolo_labels_body",
+        yolo_dir_path=f"{args.data_dir}/yolo_labels_body",
     )
     bbox_body.generate_bounding_boxes_body()
     logger.info("Bounding box body script executed successfully!")
