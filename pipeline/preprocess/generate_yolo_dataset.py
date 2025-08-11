@@ -70,6 +70,10 @@ def _collect_valid_labeled_frames(
             for line in f:
                 parts = line.strip().split()
                 if len(parts) != 9:
+                    logger.warning(
+                        "Skipping line with unexpected format: %s",
+                        line.strip(),
+                    )
                     continue
 
                 frame_idx = int(parts[0])

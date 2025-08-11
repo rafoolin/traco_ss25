@@ -1,11 +1,11 @@
 import argparse
 import os
-import logging
 
+from preprocess.compute_bounding_box import BoundingBox, SAMConfig
 from preprocess.extract_frames import extract_frames
-from preprocess.bounding_box_body import BoundingBoxBody
-from utils.logger import setup_logger
 from preprocess.generate_yolo_dataset import create_yolo_dataset
+from utils.logger import setup_logger
+from utils.sam import get_device, load_sam2
 
 logger = setup_logger()
 
@@ -13,6 +13,8 @@ logger = setup_logger()
 def run_pipeline(args: argparse.Namespace):
     frame_dir_path = f"{args.data_dir}/frames"
     yolo_db_dir = args.yolo_db_dir
+    yolo_labels = f"{args.data_dir}/yolo_raw_labels"
+    
 
     # Run the pipeline steps
     logger.info("Starting pipeline...")
@@ -24,24 +26,33 @@ def run_pipeline(args: argparse.Namespace):
         extract_frames(video_dir=args.video_dir, output_dir=frame_dir_path)
         logger.info("Frames extracted successfully!")
     # Step 2: Run bounding box script for body detection
-    logger.info("Running bounding box body script...")
-    yolo_labels = f"{args.data_dir}/yolo_raw_labels_body"
-    bbox_body = BoundingBoxBody(
+    logger.info("Running bounding box script for body & head detection...")
+    # Sam2 configuration
+    device = get_device()
+    sam2_predictor = load_sam2()
+    bbox_body = BoundingBox(
         frame_dir_path=frame_dir_path,
         csv_dir_path=args.csv_dir,
         data_dir_path=args.data_dir,
         yolo_dir_path=yolo_labels,
+        sam_config=SAMConfig(device=device, sam2_predictor=sam2_predictor),
     )
-    bbox_body.generate_bounding_boxes_body()
+    bbox_body.generate_bounding_boxes()
     logger.info("Bounding box body script executed successfully!")
-    # Step 3: Run bounding box script for head detection
-
-    # Step 4: Run Yolo dataset generator for Body
+    # Step 3: Run Yolo dataset generator for Body
     create_yolo_dataset(
         frame_dir=frame_dir_path,
-        label_dir=yolo_labels,
+        label_dir=f"{yolo_labels}/body",
         img_out=f"{yolo_db_dir}/images_body",
         lbl_out=f"{yolo_db_dir}/label_body",
+    )
+    # Step 4: Run Yolo dataset generator for Head
+    logger.info("Running Yolo dataset generator for Head...")
+    create_yolo_dataset(
+        frame_dir=frame_dir_path,
+        label_dir=f"{yolo_labels}/head",
+        img_out=f"{yolo_db_dir}/images_head",
+        lbl_out=f"{yolo_db_dir}/label_head",
     )
     logger.info("Pipeline completed successfully!")
 
