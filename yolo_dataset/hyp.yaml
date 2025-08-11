@@ -1,0 +1,30 @@
+# YOLOv8 Hyperparameters for Aggressive Augmentation
+# --- General Training Settings ---
+lr0: 0.01
+lrf: 0.01
+momentum: 0.937
+weight_decay: 0.0005
+warmup_epochs: 3.0
+warmup_momentum: 0.8
+warmup_bias_lr: 0.1
+
+# --- Aggressive Color Augmentation ---
+hsv_h: 0.05           # Hue jitter (more color variation)
+hsv_s: 0.9            # Strong saturation jitter
+hsv_v: 0.5            # Strong brightness jitter
+
+# --- Strong Geometric Augmentations ---
+degrees: 90.0         # Very wide rotation range
+translate: 0.2        # Up to 20% movement
+scale: 0.7            # Wider zoom range
+shear: 10.0           # Stronger skewing
+perspective: 0.001    # Add slight perspective distortion
+
+# --- Flips ---
+fliplr: 0.9
+flipud: 0.9
+
+# --- Composite Augmentations ---
+mosaic: 1.0
+mixup: 0.4
+copy_paste: 0.2       # For object detection

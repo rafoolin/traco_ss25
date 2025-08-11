@@ -1,0 +1,20 @@
+path: yolo_dataset
+train: datasets/head/images/train
+val: datasets/head/images/val
+
+nc: 11
+names: [
+  "hexbug #00",
+  "hexbug #01",
+  "hexbug #02",
+  "hexbug #03",
+  "hexbug #04",
+  "hexbug #05",
+  "hexbug #06",
+  "hexbug #07",
+  "hexbug #08",
+  "hexbug #09",
+  "hexbug #10",
+]
+
+kpt_shape: [1, 3]

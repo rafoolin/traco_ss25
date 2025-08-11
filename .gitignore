@@ -2,3 +2,7 @@ traco_2024/
 data/
 sam2
 __pycache__
+
+# YOLO files
+yolo_dataset/datasets
+yolo_dataset/runs
