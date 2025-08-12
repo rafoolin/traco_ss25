@@ -56,7 +56,7 @@ You’re now ready to proceed to the training or detection steps.
 Train both models (separate dataset YAMLs; same hyp).
 
 ```bash
-python tracking_olympiad/pipeline/train.py \
+python tracking_olympiad/train.py \
 --video_dir "./traco_2024/training" \
 --csv_dir "./traco_2024/training" \
 --data_dir "./data" \
@@ -80,7 +80,7 @@ Export detected Hexbugs for each frame with `primary` & `fallback` model selecti
 To run detection, use:
 
 ```bash
-python tracking_olympiad/pipeline/detector.py \
+python tracking_olympiad/detector.py \
 --video_path "./traco_2024/leaderboard_data/test001.mp4" \
 --primary_model_path "./yolo_dataset/runs/pose/body_train/weights/best.pt" \
 --fallback_model_path "./yolo_dataset/runs/pose/head_train/weights/best.pt" \

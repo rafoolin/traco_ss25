@@ -9,7 +9,7 @@ logger = setup_logger()
 def get_yolo_labels_body(mask_dict, image_size, frame_index):
     """Generates YOLO format labels for body masks."""
 
-    bbox = get_mask_bounding_box(mask_dict["mask"])
+    bbox = mask_dict["bbox"]
     if bbox is None:
         return []
     image_width, image_height = image_size
