@@ -4,8 +4,8 @@ import os
 import shutil
 from typing import Dict, List, Tuple
 from sklearn.model_selection import train_test_split
-from utils.logger import setup_logger
-from utils.file_utils import reset_dir
+from pipeline.utils.logger import setup_logger
+from pipeline.utils.file_utils import reset_dir
 
 logger = setup_logger()
 

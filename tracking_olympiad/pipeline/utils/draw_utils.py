@@ -1,9 +1,9 @@
 import os
 
 from PIL import Image, ImageDraw
-from utils.file_utils import mkdir_safe
-from utils.logger import setup_logger
-from utils.mask_utils import get_mask_bounding_box
+from pipeline.utils.file_utils import mkdir_safe
+from pipeline.utils.logger import setup_logger
+from pipeline.utils.mask_utils import get_mask_bounding_box
 
 logger = setup_logger()
 

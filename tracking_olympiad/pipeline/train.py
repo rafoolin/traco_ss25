@@ -2,7 +2,7 @@ import os
 from ultralytics import YOLO
 import yaml
 
-from utils.logger import setup_logger
+from pipeline.utils.logger import setup_logger
 
 logger = setup_logger()
 

@@ -1,7 +1,7 @@
 import cv2
 import os
 
-from utils.file_utils import mkdir_safe
+from pipeline.utils.file_utils import mkdir_safe
 
 
 def extract_frames(video_dir, output_dir):

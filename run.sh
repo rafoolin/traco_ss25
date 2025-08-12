@@ -82,7 +82,7 @@ info "SAM2 model installed successfully."
 
 # Step 7: Run the pipeline
 info "Running pipeline script..."
-python pipeline/pipeline.py \
+python tracking_olympiad/run.py \
 --video_dir "./traco_2024/training" \
 --csv_dir "./traco_2024/training" \
 --data_dir "./data" \

@@ -1,12 +1,12 @@
 import argparse
 import os
 
-from preprocess.compute_bounding_box import BoundingBox, SAMConfig
-from preprocess.extract_frames import extract_frames
-from preprocess.generate_yolo_dataset import create_yolo_dataset
-from preprocess.yolo_train import YoloDataset
-from utils.logger import setup_logger
-from utils.sam import get_device, load_sam2
+from pipeline.preprocess.compute_bounding_box import BoundingBox, SAMConfig
+from pipeline.preprocess.extract_frames import extract_frames
+from pipeline.preprocess.generate_yolo_dataset import create_yolo_dataset
+from pipeline.train import YoloDataset
+from pipeline.utils.logger import setup_logger
+from pipeline.utils.sam import get_device, load_sam2
 
 logger = setup_logger()
 

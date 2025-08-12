@@ -2,13 +2,13 @@ from dataclasses import dataclass
 import os
 
 
-import utils.frame_utils as frame_utils
-import utils.draw_utils as draw_utils
-import utils.yolo_labels as yolo_labels
-import utils.mask_utils as mask_utils
+import pipeline.utils.frame_utils as frame_utils
+import pipeline.utils.draw_utils as draw_utils
+import pipeline.utils.yolo_labels as yolo_labels
+import pipeline.utils.mask_utils as mask_utils
 from PIL import Image
-from utils.file_utils import mkdir_safe
-from utils.logger import setup_logger
+from pipeline.utils.file_utils import mkdir_safe
+from pipeline.utils.logger import setup_logger
 
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 

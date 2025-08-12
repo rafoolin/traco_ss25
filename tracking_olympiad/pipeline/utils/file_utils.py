@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from utils.logger import setup_logger
+from pipeline.utils.logger import setup_logger
 
 logger = setup_logger()
 
