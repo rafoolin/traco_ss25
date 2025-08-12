@@ -108,24 +108,23 @@ def _process_video(
             )
 
         chosen = _choose_detections(p_dets, f_dets, primary_thresh, fallback_thresh)
+        image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        annotated_image: Image = None
         for x, y, _, bbox in chosen:
-            rows.append([row_id, frame_id, -1, x, y, bbox])
+            rows.append([row_id, frame_id, -1, x, y])
             row_id += 1
-        if annotate_results:
-            image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            annotated_image = draw_head_and_bbox(
-                image=image,
-                masks=[
-                    {
-                        "bbox": bbox,
-                        "x": x,
-                        "y": y,
-                        "hexbug": "-",
-                    }
-                    for x, y, _, bbox in chosen
-                    if bbox is not None
-                ],
-            )
+            if annotate_results:
+                annotated_image = draw_head_and_bbox(
+                    image=image,
+                    masks=[
+                        {
+                            "bbox": bbox,
+                            "x": x,
+                            "y": y,
+                            "hexbug": "-",
+                        }
+                    ],
+                )
             save_annotated_image(
                 annotation_dir_path=annotate_dir,
                 annotated_image=annotated_image,
@@ -135,7 +134,7 @@ def _process_video(
         frame_id += 1
     cap.release()
 
-    return rows[:-1]
+    return rows
 
 
 def detect_hexbugs_head(
