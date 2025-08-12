@@ -2,13 +2,13 @@ from dataclasses import dataclass
 import os
 
 
-import pipeline.utils.frame_utils as frame_utils
-import pipeline.utils.draw_utils as draw_utils
-import pipeline.utils.yolo_labels as yolo_labels
-import pipeline.utils.mask_utils as mask_utils
+import utils.frame_utils as frame_utils
+import utils.draw_utils as draw_utils
+import utils.yolo_labels as yolo_labels
+import utils.mask_utils as mask_utils
 from PIL import Image
-from pipeline.utils.file_utils import mkdir_safe
-from pipeline.utils.logger import setup_logger
+from utils.file_utils import mkdir_safe
+from utils.logger import setup_logger
 
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
@@ -66,7 +66,7 @@ class BoundingBox:
         """
         # Walk through video directories
         all_videos = sorted(os.listdir(self.frame_dir_path))
-        for video_name in all_videos:
+        for video_name in ["training020"]:
             logger.info("Processing video: %s", video_name)
             frame_path = os.path.join(self.frame_dir_path, video_name)
             csv_path = os.path.join(self.csv_dir_path, f"{video_name}.csv")
@@ -104,7 +104,7 @@ class BoundingBox:
                     self.sam_config.sam2_predictor,
                 )
                 # Annotate Body
-                annotated_image_body = draw_utils.draw_mask_and_center(
+                annotated_image_body = draw_utils.draw_head_and_bbox(
                     image.copy(),
                     mask_list,
                 )

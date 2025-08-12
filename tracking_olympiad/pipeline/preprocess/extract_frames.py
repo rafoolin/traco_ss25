@@ -1,10 +1,10 @@
 import cv2
 import os
 
-from pipeline.utils.file_utils import mkdir_safe
+from utils.file_utils import mkdir_safe
 
 
-def extract_frames(video_dir, output_dir):
+def extract_frames(video_path, output_dir):
     """
     Extract frames from a video file and save them as images.
 
@@ -12,11 +12,11 @@ def extract_frames(video_dir, output_dir):
     :param output_dir: Folder where extracted frames will be saved.
     """
     mkdir_safe(output_dir)
-    for filename in os.listdir(video_dir):
+    for filename in os.listdir(video_path):
         if not filename.endswith(".mp4"):
             continue
 
-        video_path = os.path.join(video_dir, filename)
+        video_path = os.path.join(video_path, filename)
         name = os.path.splitext(filename)[0]
         save_path = os.path.join(output_dir, name)
         mkdir_safe(save_path)

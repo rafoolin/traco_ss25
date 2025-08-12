@@ -38,7 +38,7 @@ def get_frame_masks(
     )
     return [
         {
-            "mask": mask,
+            "bbox": get_mask_bounding_box(mask),
             "x": hexbug["x"],
             "y": hexbug["y"],
             "hexbug": hexbug["hexbug"],
@@ -65,3 +65,17 @@ def get_mask_bounding_box(mask: np.ndarray) -> tuple:
     x_min, x_max = xs.min(), xs.max()
     y_min, y_max = ys.min(), ys.max()
     return (x_min, y_min), (x_max, y_max)
+
+
+def extract_xy(boxes, keypoints, i):
+    """
+    Prefer the first keypoint (index 0) if available, otherwise bbox center (xywh).
+    Returns (x, y) as floats.
+    """
+    if keypoints is not None and getattr(keypoints, "xy", None) is not None:
+        k = keypoints.xy[i]
+        if k is not None and len(k) > 0:
+            return float(k[0][0]), float(k[0][1])
+    # fallback: bbox center (xywh)
+    xywh = boxes.xywh[i]
+    return float(xywh[0]), float(xywh[1])

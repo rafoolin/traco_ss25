@@ -1,9 +1,9 @@
 import os
 
 from PIL import Image, ImageDraw
-from pipeline.utils.file_utils import mkdir_safe
-from pipeline.utils.logger import setup_logger
-from pipeline.utils.mask_utils import get_mask_bounding_box
+from utils.file_utils import mkdir_safe
+from utils.logger import setup_logger
+from utils.mask_utils import get_mask_bounding_box
 
 logger = setup_logger()
 
@@ -53,14 +53,14 @@ def draw_head_fixed_bbox(
     return image
 
 
-def draw_mask_and_center(image: Image, masks: list):
+def draw_head_and_bbox(image: Image, masks: list):
     """
     Draws masks, center points, and bounding boxes for a list of detected objects on an image.
 
     Args:
         image (Image): The image on which to draw. Should be a PIL Image object.
         masks (list): A list of dictionaries, each containing:
-            - "mask": The mask of the detected object (format expected by get_mask_bounding_box).
+            - "bbox": Bounding box of format ((x_min, y_min), (x_max, y_max))
             - "hexbug": An identifier for the object.
             - "x": The x-coordinate of the object's center.
             - "y": The y-coordinate of the object's center.
@@ -72,7 +72,7 @@ def draw_mask_and_center(image: Image, masks: list):
     for mask_dict in masks:
         if mask_dict is None:
             continue
-        mask = mask_dict["mask"]
+        bbox = mask_dict["bbox"]
         hexbug = mask_dict["hexbug"]
         # Center point
         x, y = int(mask_dict["x"]), int(mask_dict["y"])
@@ -84,7 +84,6 @@ def draw_mask_and_center(image: Image, masks: list):
         )
 
         # Bounding box
-        bbox = get_mask_bounding_box(mask)
         if bbox is None:
             logger.warning(" -No bounding box for hexbug %s at (%f, %f)", hexbug, x, y)
             continue
@@ -110,4 +109,4 @@ def save_annotated_image(annotation_dir_path, annotated_image, video_name, frame
         f"frame_{frame_index:05d}.jpg",
     )
     mkdir_safe(os.path.dirname(output_image_path))
-    annotated_image.save(output_image_path)
+    annotated_image.save(output_image_path) 

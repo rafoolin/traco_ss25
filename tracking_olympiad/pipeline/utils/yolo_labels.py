@@ -1,6 +1,6 @@
 import os
-from pipeline.utils.logger import setup_logger
-from pipeline.utils.draw_utils import get_mask_bounding_box
+from utils.logger import setup_logger
+from utils.draw_utils import get_mask_bounding_box
 
 
 logger = setup_logger()

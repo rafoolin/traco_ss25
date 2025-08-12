@@ -6,3 +6,7 @@ __pycache__
 # YOLO files
 yolo_dataset/datasets
 yolo_dataset/runs
+yolo_dataset/*.pt
+
+# Output directories
+output

@@ -79,12 +79,3 @@ fi
 info "Installing SAM2 model..."
 (cd sam2 && pip install -e .) || error "Failed to install SAM2 model."
 info "SAM2 model installed successfully."
-
-# Step 7: Run the pipeline
-info "Running pipeline script..."
-python tracking_olympiad/run.py \
---video_dir "./traco_2024/training" \
---csv_dir "./traco_2024/training" \
---data_dir "./data" \
---yolo_db_dir "./yolo_dataset/datasets" || error "Pipeline script failed."
-info "Pipeline executed successfully."

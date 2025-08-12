@@ -1,7 +1,7 @@
 import os
 
 import torch
-from pipeline.utils.logger import setup_logger
+from utils.logger import setup_logger
 
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor

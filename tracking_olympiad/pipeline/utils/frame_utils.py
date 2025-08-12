@@ -1,3 +1,6 @@
+import csv
+import os
+
 import pandas as pd
 
 
@@ -30,3 +33,13 @@ def save_missing_frames(missing_data, video_name, annotation_dir_path):
         encoding="utf-8",
     ) as f:
         f.write(f"-{video_name}:\n\t{missing_data}\n")
+
+
+def write_hexbug_head_to_csv(rows, save_path):
+    """Writes hexbug head detection results to a CSV file."""
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    with open(save_path, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["", "t", "hexbug", "x", "y"])
+        w.writerows(rows)
+    return save_path
