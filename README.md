@@ -90,3 +90,50 @@ python tracking_olympiad/detector.py \
 --annotate_results \
 --annotate_dir "./output/annotations"
 ```
+
+
+## Hexbug Tracker — ID Assignment
+
+This step assigns stable IDs to detected Hexbug positions in each frame of a video.
+It is intended to run after the detection step in the pipeline and will read the detection CSV (with hexbug=-1), use appearance + position matching to keep consistent IDs across frames, and output an updated CSV.
+
+**Input:**
+
+- A .mp4 video file.
+- A CSV file with detection results from the detection stage.
+
+The CSV must contain:
+
+```text
+t,x,y,hexbug
+```
+
+- t: frame index
+- x,y: detection coordinates
+- hexbug: initially -1 for all rows
+
+**Output:**
+
+- A CSV file with the same columns, but hexbug replaced by stable IDs in the range [0, max_ids-1].
+
+**How It Works**:
+
+- Hungarian algorithm assigns detections to existing tracks based on:
+- Euclidean distance between positions.
+- Mean BGR color extracted from a square patch around each detection.
+- Tracks are kept alive for a few frames (max_missing_frames) to handle short occlusions.
+- If a detection does not match an existing track and there are free IDs available, a new track is created.
+- Color helps distinguish Hexbugs that are spatially close.
+
+```bash
+python ./tracking_olympiad/tracker.py \
+--video_path ./traco_2024/leaderboard_data/test001.mp4 \
+--csv_in ./output/detector_csv_files/predicted_test001.csv \
+--csv_out output/detector_csv_files/predicted_test001_ids.csv \
+--patch_size 50 \
+--distance_weight 1.0 \
+--color_weight 0.1 \
+--max_cost 200 \
+--max_missing_frames 3 \
+--max_ids 3
+```
