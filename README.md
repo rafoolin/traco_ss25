@@ -59,7 +59,7 @@ This script will:
 
 After this, you are ready for training or detection.
 
-**NOTE:**
+⚠️ **CAUTION:** ⚠️
 
 Make sure you have correctly activated the conda environment called `traco_env`.
 
