@@ -4,7 +4,7 @@
 
 This project is part of the [Tracking Olympiad seminar](https://traco.anki.xyz/) at FAU.
 
-This repository contains the full pipeline for detecting and tracking multiple Hexbugs videos.  
+This repository contains the full pipeline for detecting and tracking multiple Hexbugs in videos.  
 The process is split into **modular steps** so you can run or debug each stage independently.
 
 ## 📂 Dataset
@@ -53,20 +53,20 @@ This script will:
 1. **Clone** required repositories (e.g., Traco, SAM2).
 2. **Create & activate** the conda environment.
 3. **Install** all Python dependencies from `requirements.txt`.
-4. **Download & install** the SAM2 model(For segmentation used for detecting bounding box around HexBugs).
+4. **Download & install** the SAM2 model(For segmentation in order to detect bounding box around HexBugs).
 5. **Extract frames** from training videos.
-6. **Prepare** the YOLO dataset folder structure.
+6. **Prepare** the YOLO images and labels datasets.
 
 After this, you are ready for training or detection.
 
 ## 🎯 Bounding Box Generation
 
-This step uses the **SAM2 segmentation model** to generate bounding boxes for Hexbug **bodies** and **heads** from annotated CSV coordinates.
+This step is done in the set-up section of the pipeline, so you don't need to do anything. Here is only a brief explanation on how it works. This step uses the **SAM2 segmentation model** to generate bounding boxes for Hexbug **bodies** and **heads** from annotated CSV coordinates.
 
 **How it works:**
 
-- Reads the CSV annotations for each frame of a video.
-- Uses SAM2 to generate precise masks for detected objects.
+- Reads the CSV annotations for each frame each training videos.
+- Uses SAM2 to generate precise masks for Hexbugs.
 - Converts masks into bounding boxes for **body** and fixed-size boxes for **head**.
 - Saves annotated images and YOLO-format label files for later YOLO training.
 
