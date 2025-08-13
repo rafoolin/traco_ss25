@@ -1,3 +1,5 @@
+![Python](https://img.shields.io/badge/python-3.10-blue)  
+
 # Tracking Olympiad
 
 This project is part of the [Tracking Olympiad seminar](https://traco.anki.xyz/) at FAU.
@@ -57,7 +59,7 @@ This script will:
 
 After this, you are ready for training or detection.
 
-## Bounding Box Generation
+## 🎯 Bounding Box Generation
 
 This step uses the **SAM2 segmentation model** to generate bounding boxes for Hexbug **bodies** and **heads** from annotated CSV coordinates.
 
