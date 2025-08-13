@@ -1,6 +1,5 @@
 import os
 from utils.logger import setup_logger
-from utils.draw_utils import get_mask_bounding_box
 
 
 logger = setup_logger()

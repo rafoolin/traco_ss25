@@ -1,7 +1,6 @@
 # track_assign_ids.py
 import argparse
 import os
-from dataclasses import dataclass
 
 import cv2
 import numpy as np
@@ -14,7 +13,6 @@ from utils.logger import setup_logger
 logger = setup_logger()
 
 
-@dataclass(frozen=True)
 class TrackerConfig:
     def __init__(
         self,
