@@ -1,22 +1,29 @@
 # Tracking Olympiad
 
-## Dataset
+This project is part of the [Tracking Olympiad seminar](https://traco.anki.xyz/) at FAU.
 
-The dataset contains video frames and their corresponding annotations in CSV format.
+This repository contains the full pipeline for detecting and tracking multiple Hexbugs videos.  
+The process is split into **modular steps** so you can run or debug each stage independently.
 
-- Each video is stored in its own directory under the dataset root.
-- For every video directory, there is a matching CSV file (same name as the directory) containing the frame-by-frame annotations.
+## 📂 Dataset
 
-**NOTE:** Known Issue: Swapped X/Y Coordinates
+The dataset contains video frames and their corresponding annotations in CSV format from [traco_2024](https://github.com/ankilab/traco_2024) repository.
 
-Some training videos have the x and y coordinates swapped in their CSV annotations.
-If these videos are still present in the dataset, you can correct them by running:
+- Each video is stored under the dataset root.
+- For every video, there is a matching CSV file (same name as the video) containing the frame-by-frame annotations.
+
+There is a bash file that clones these repositories and set the projects up.
+
+### ⚠️ Known Issue — Swapped X/Y
+
+Some videos have swapped coordinates in their CSVs.  
+If you still have these in your dataset, first set the project up and then fix them by running:
 
 ```bash
 python scripts/fix_swapped_xy.py
 ```
 
-The affected videos are:
+Affected videos:
 
 ```text
 problematic_videos = [
@@ -31,29 +38,42 @@ problematic_videos = [
     ]
 ```
 
-## Setup environment
+## ⚙️ Environment Setup
 
-Before running training or detection, set up the environment and required packages by running:
+Before training or running detection, set up the environment:
 
 ```bash
 bash run.sh
 ```
 
-This will:
+This script will:
 
-1. Clone all required external repositories (e.g., Traco, SAM2).
-2. Create and configure the conda environment and activate it.
-3. Install all Python dependencies from requirements.txt
-4. Install the SAM2 model.
-5. Extract frames from the training videos and save them in the `data` directory.
-6. Prepare the YOLO dataset for training by extracting frames and annotations from the CSV files.
-7. Create the necessary directories for YOLO dataset structure.
+1. **Clone** required repositories (e.g., Traco, SAM2).
+2. **Create & activate** the conda environment.
+3. **Install** all Python dependencies from `requirements.txt`.
+4. **Download & install** the SAM2 model(For segmentation used for detecting bounding box around HexBugs).
+5. **Extract frames** from training videos.
+6. **Prepare** the YOLO dataset folder structure.
 
-You’re now ready to proceed to the training or detection steps.
+After this, you are ready for training or detection.
 
-## Training (head & body)
+## Bounding Box Generation
 
-Train both models (separate dataset YAMLs; same hyp).
+This step uses the **SAM2 segmentation model** to generate bounding boxes for Hexbug **bodies** and **heads** from annotated CSV coordinates.
+
+**How it works:**
+
+- Reads the CSV annotations for each frame of a video.
+- Uses SAM2 to generate precise masks for detected objects.
+- Converts masks into bounding boxes for **body** and fixed-size boxes for **head**.
+- Saves annotated images and YOLO-format label files for later YOLO training.
+
+## 🏋️ Training (Head & Body Models)
+
+We train **two separate YOLOv8-pose models**:
+
+- **Body model**: detects Hexbug bodies.
+- **Head model**: detects Hexbug heads.
 
 ```bash
 python tracking_olympiad/train.py \
@@ -66,18 +86,27 @@ python tracking_olympiad/train.py \
 --hyp_path "./yolo_dataset/hyp.yaml"
 ```
 
-- Uses: `configs/hexbug_head.yaml`, `configs/hexbug_body.yaml`, `hyp.yaml`
-- Produces weights in `runs/pose/{head,body}_train/weights/best.pt`
+**This will**:
 
-## Detection (head & body)
+- **Use** `configs/hexbug_head.yaml`, `configs/hexbug_body.yaml`, `hyp.yaml`
+- **Produce** weights in `runs/pose/{head,body}_train/weights/best.pt`
 
-Export detected Hexbugs for each frame with `primary` & `fallback` model selection:
+**Trained Models:**
 
-- If `primary` has any detection above `primary_thresh`, use it;
-- Otherwise use whichever model has higher max confidence, each filtered by its own threshold.
-- Detector output `CSV` sets `hexbug=-1` (we do ID assignment later).
+I have included the trained YOLO models in `yolo_dataset/models` so you can run detection directly without retraining.  
+Just make sure to update the `--primary_model_path` and `--fallback_model_path` arguments in the detection command above to point to the correct model files.
 
-To run detection, use:
+## 🔍 Detection
+
+This step detects Hexbugs in each frame.
+
+Uses **primary** and **fallback** models:
+
+- If `primary` finds a detection ≥ `primary_thresh`, use it.
+
+- Otherwise, use whichever model has the highest confidence.
+
+**Run detection**:
 
 ```bash
 python tracking_olympiad/detector.py \
@@ -91,39 +120,32 @@ python tracking_olympiad/detector.py \
 --annotate_dir "./output/annotations"
 ```
 
+**Output**:
 
-## Hexbug Tracker — ID Assignment
-
-This step assigns stable IDs to detected Hexbug positions in each frame of a video.
-It is intended to run after the detection step in the pipeline and will read the detection CSV (with hexbug=-1), use appearance + position matching to keep consistent IDs across frames, and output an updated CSV.
-
-**Input:**
-
-- A .mp4 video file.
-- A CSV file with detection results from the detection stage.
-
-The CSV must contain:
+- CSV file with:
 
 ```text
-t,x,y,hexbug
+  t, hexbug, x, y
 ```
 
-- t: frame index
-- x,y: detection coordinates
-- hexbug: initially -1 for all rows
+(IDs are set to `-1` here —> ID assignment happens in the next step)
 
-**Output:**
+- Optional annotated images in `--annotate_dir`.
 
-- A CSV file with the same columns, but hexbug replaced by stable IDs in the range [0, max_ids-1].
+## 🎯 Tracking & ID Assignment
 
-**How It Works**:
+This script assigns **consistent IDs** to Hexbug detections across video frames.  
+It reads a detection CSV (from the detector stage) and the corresponding video,  
+then uses **position** and **color similarity** to match detections over time.
 
-- Hungarian algorithm assigns detections to existing tracks based on:
-- Euclidean distance between positions.
-- Mean BGR color extracted from a square patch around each detection.
-- Tracks are kept alive for a few frames (max_missing_frames) to handle short occlusions.
-- If a detection does not match an existing track and there are free IDs available, a new track is created.
-- Color helps distinguish Hexbugs that are spatially close.
+**How it works:**
+
+- For each frame, extract `(x, y)` positions from the CSV and mean BGR color from the video.
+- Match detections to previous tracks using the **Hungarian algorithm** with a cost based on distance and color.
+- Keep tracks alive for a few frames to handle short occlusions.
+- Assign new IDs when needed, never exceeding the `max_ids` limit.
+
+**Run tracker**:
 
 ```bash
 python ./tracking_olympiad/tracker.py \
@@ -137,3 +159,33 @@ python ./tracking_olympiad/tracker.py \
 --max_missing_frames 3 \
 --max_ids 3
 ```
+
+**Output**:
+
+- CSV with same columns as detection CSV, but `hexbug` now contains **stable IDs** `[0 .. max_ids-1]`.
+
+## ⚠️ Important Note on Tracking Algorithm
+
+The **training** and **preprocessing** steps for detecting bounding boxes (SAM2 + YOLO detector) are solid and work reliably.
+
+However, the **tracking** algorithm provided here is **not highly accurate**.  
+I experimented with both my custom tracker (based on Hungarian matching with position & color features) and existing trackers like **DeepSORT** and **ByteTrack**, but the results were still not robust enough for competitive performance.
+
+**Recommendation:**  
+If you plan to build upon this repository, consider replacing or improving the tracking stage with a more advanced, competition-ready tracker.
+
+## 📌 Full Pipeline
+
+1. **Setup** → `bash run.sh`
+2. **Train models** → `train.py`
+3. **Detect** → `detector.py`
+4. **Track / Assign IDs** → `tracker.py`
+
+## 📚 References
+
+- **Tracking Olympiad (TRACO)**: [https://traco.anki.xyz/](https://traco.anki.xyz/)
+- **YOLOv8**: [https://github.com/ultralytics/ultralytics](https://github.com/ultralytics/ultralytics)  
+- **Segment Anything Model 2 (SAM2)**: [https://github.com/facebookresearch/segment-anything-2](https://github.com/facebookresearch/segment-anything-2)  
+- **DeepSORT**: [https://github.com/nwojke/deep_sort](https://github.com/nwojke/deep_sort)  
+- **ByteTrack**: [https://github.com/ifzhang/ByteTrack](https://github.com/ifzhang/ByteTrack)  
+- **Hungarian Algorithm (linear_sum_assignment)**: [https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linear_sum_assignment.html](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linear_sum_assignment.html)  
