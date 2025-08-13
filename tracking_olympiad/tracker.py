@@ -1,4 +1,3 @@
-# track_assign_ids.py
 import argparse
 import os
 
