@@ -3,7 +3,6 @@ import os
 from PIL import Image, ImageDraw
 from utils.file_utils import mkdir_safe
 from utils.logger import setup_logger
-from utils.mask_utils import get_mask_bounding_box
 
 logger = setup_logger()
 
@@ -17,12 +16,18 @@ def draw_head_fixed_bbox(
     shift_y=25,
 ):
     """
-    Annotates the head part of the video frame with bounding boxes and center points.
+    Draws fixed-size head bounding boxes and center points.
 
     Args:
-        image (Image): The image to annotate.
-        frame_index (int): The index of the frame.
-        csv_data (dict): The CSV data containing hexbug coordinates.
+        image (Image): Image to annotate.
+        frame_index (int): Frame index.
+        csv_data (dict): Frame-wise hexbug coordinates.
+        box_size (int, optional): Bounding box size. Defaults to 50.
+        shift_x (int, optional): Horizontal shift. Defaults to 25.
+        shift_y (int, optional): Vertical shift. Defaults to 25.
+
+    Returns:
+        Image: Annotated image.
     """
     hexbugs_data = csv_data[frame_index]
     if not hexbugs_data:
@@ -55,18 +60,18 @@ def draw_head_fixed_bbox(
 
 def draw_head_and_bbox(image: Image, masks: list):
     """
-    Draws masks, center points, and bounding boxes for a list of detected objects on an image.
+    Draws center points and bounding boxes on an image.
 
     Args:
-        image (Image): The image on which to draw. Should be a PIL Image object.
-        masks (list): A list of dictionaries, each containing:
-            - "bbox": Bounding box of format ((x_min, y_min), (x_max, y_max))
-            - "hexbug": An identifier for the object.
-            - "x": The x-coordinate of the object's center.
-            - "y": The y-coordinate of the object's center.
+        image (Image): PIL Image to annotate.
+        masks (list): List of dicts with:
+            - "bbox": ((x_min, y_min), (x_max, y_max))
+            - "hexbug": Object ID.
+            - "x": X center coordinate.
+            - "y": Y center coordinate.
 
     Returns:
-        Image: The modified image with drawn masks, center points, bounding boxes, and labels.
+        Image: Annotated image.
     """
     draw = ImageDraw.Draw(image)
     for mask_dict in masks:
@@ -95,13 +100,13 @@ def draw_head_and_bbox(image: Image, masks: list):
 
 def save_annotated_image(annotation_dir_path, annotated_image, video_name, frame_index):
     """
-    Saves the annotated image to the specified directory.
+    Saves an annotated image to disk.
 
     Args:
-        annotation_dir_path (str): Path to the directory where the annotated image will be saved.
-        annotated_image (Image): The annotated image to be saved.
-        video_name (str): The name of the video for which the image is being saved.
-        frame_index (int): The index of the frame in the video.
+        annotation_dir_path (str): Directory to save the image.
+        annotated_image (Image): PIL Image to save.
+        video_name (str): Video name for folder structure.
+        frame_index (int): Frame index for file naming.
     """
     output_image_path = os.path.join(
         annotation_dir_path,
@@ -109,4 +114,4 @@ def save_annotated_image(annotation_dir_path, annotated_image, video_name, frame
         f"frame_{frame_index:05d}.jpg",
     )
     mkdir_safe(os.path.dirname(output_image_path))
-    annotated_image.save(output_image_path) 
+    annotated_image.save(output_image_path)

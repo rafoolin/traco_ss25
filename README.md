@@ -59,9 +59,13 @@ This script will:
 
 After this, you are ready for training or detection.
 
+**NOTE:**
+
+Make sure you have correctly activated the conda environment called `traco_env`.
+
 ## 🎯 Bounding Box Generation
 
-This step is done in the set-up section of the pipeline, so you don't need to do anything. Here is only a brief explanation on how it works. This step uses the **SAM2 segmentation model** to generate bounding boxes for Hexbug **bodies** and **heads** from annotated CSV coordinates.
+This step uses the **SAM2 segmentation model** to generate bounding boxes for Hexbug **bodies** and **heads** from annotated CSV coordinates.
 
 **How it works:**
 

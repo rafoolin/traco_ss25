@@ -1,15 +1,20 @@
 # track_assign_ids.py
-import os
 import argparse
+import os
+from dataclasses import dataclass
+
 import cv2
 import numpy as np
 import pandas as pd
 from scipy.optimize import linear_sum_assignment
-import ast
-
 from utils.media import open_video
+from utils.logger import setup_logger
 
 
+logger = setup_logger()
+
+
+@dataclass(frozen=True)
 class TrackerConfig:
     def __init__(
         self,
@@ -28,15 +33,7 @@ class TrackerConfig:
         self.max_ids = int(max_ids)
 
 
-def parse_bbox_str(bbox_str):
-    """Convert '((x1, y1), (x2, y2))' string to center point (cx, cy)."""
-    (x1, y1), (x2, y2) = ast.literal_eval(bbox_str)
-    cx = (x1 + x2) / 2.0
-    cy = (y1 + y2) / 2.0
-    return cx, cy
-
-
-def extract_color(frame, x, y, patch=50):
+def _extract_color(frame, x, y, patch=50):
     """Mean BGR color in a square patch around (x, y)."""
     h, w = frame.shape[:2]
     x1 = max(int(x) - patch, 0)
@@ -49,7 +46,7 @@ def extract_color(frame, x, y, patch=50):
     return sub.mean(axis=(0, 1)).astype(np.float32)  # (B,G,R)
 
 
-def get_frame(cap, t, cache):
+def _get_frame(cap, t, cache):
     """Random-access a specific frame index (t) with small cache."""
     if t not in cache:
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(t))
@@ -60,12 +57,24 @@ def get_frame(cap, t, cache):
     return cache[t]
 
 
-def assign_ids_for_video(
+def _assign_ids_for_video(
     video_path: str,
     detections_csv_path: str,
     output_csv_path: str,
     cfg: TrackerConfig,
 ):
+    """
+    Assigns consistent object IDs to detections across video frames using position and color similarity.
+
+    Args:
+        video_path (str): Path to the input video file.
+        detections_csv_path (str): Path to the CSV file containing frame-by-frame detections (with x, y coordinates).
+        output_csv_path (str): Path to save the updated CSV with assigned IDs.
+        cfg (TrackerConfig): Tracker configuration containing patch size, weights, cost thresholds, and limits.
+
+    Returns:
+        str: Path to the saved output CSV file containing updated detection data with assigned IDs.
+    """
     # Load detections
     df = pd.read_csv(detections_csv_path)
     if not {"t", "x", "y"}.issubset(df.columns):
@@ -82,7 +91,7 @@ def assign_ids_for_video(
 
     # Process in frame order
     for t in sorted(df["t"].unique()):
-        frame = get_frame(cap, t, frame_cache)
+        frame = _get_frame(cap, t, frame_cache)
         if frame is None:
             continue
 
@@ -92,7 +101,7 @@ def assign_ids_for_video(
 
         curr_pos = detections[["x", "y"]].values.astype(np.float32)
         curr_col = np.array(
-            [extract_color(frame, x, y, patch=cfg.patch_size) for x, y in curr_pos],
+            [_extract_color(frame, x, y, patch=cfg.patch_size) for x, y in curr_pos],
             dtype=np.float32,
         )
 
@@ -166,9 +175,57 @@ def assign_ids_for_video(
     return output_csv_path
 
 
-def run():
-    parser = argparse.ArgumentParser(description="Assign stable IDs to hexbug detections.")
-    parser.add_argument("--video_path", required=True, type=str, help="Path to the video.")
+def run(
+    video_path: str,
+    csv_in: str,
+    csv_out: str,
+    patch_size: int,
+    distance_weight: float,
+    color_weight: float,
+    max_cost: int,
+    max_missing_frames: int,
+    max_ids: int,
+):
+    """
+    Runs the Hexbug ID assignment pipeline.
+
+    Args:
+        video_path (str): Path to the input video file.
+        csv_in (str): Path to the detections CSV (with initial hexbug=-1).
+        csv_out (str): Path to save the updated CSV with assigned IDs.
+        patch_size (int): Patch size for mean color extraction.
+        distance_weight (float): Weight for position distance in cost function.
+        color_weight (float): Weight for color distance in cost function.
+        max_cost (float): Maximum allowed matching cost.
+        max_missing_frames (int): Frames to keep a track alive without detection.
+        max_ids (int): Maximum number of unique IDs to assign.
+    """
+    cfg = TrackerConfig(
+        patch_size=patch_size,
+        distance_weight=distance_weight,
+        color_weight=color_weight,
+        max_cost=max_cost,
+        max_missing_frames=max_missing_frames,
+        max_ids=max_ids,
+    )
+
+    out = _assign_ids_for_video(
+        video_path=video_path,
+        detections_csv_path=csv_in,
+        output_csv_path=csv_out,
+        cfg=cfg,
+    )
+    logger.info("Saved to %s", out)
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(
+        description="Assign stable IDs to hexbug detections."
+    )
+    parser.add_argument(
+        "--video_path", required=True, type=str, help="Path to the video."
+    )
     parser.add_argument(
         "--csv_in",
         required=True,
@@ -186,23 +243,14 @@ def run():
     parser.add_argument("--max_ids", type=int, default=11)
     args = parser.parse_args()
 
-    cfg = TrackerConfig(
-        patch_size=args.patch_size,
-        distance_weight=args.distance_weight,
-        color_weight=args.color_weight,
-        max_cost=args.max_cost,
-        max_missing_frames=args.max_missing_frames,
-        max_ids=args.max_ids,
-    )
-
-    out = assign_ids_for_video(
+    run(
         video_path=args.video_path,
-        detections_csv_path=args.csv_in,
-        output_csv_path=args.csv_out,
-        cfg=cfg,
+        color_weight=args.color_weight,
+        csv_in=args.csv_in,
+        csv_out=args.csv_out,
+        distance_weight=args.distance_weight,
+        max_cost=args.max_cost,
+        max_ids=args.max_ids,
+        max_missing_frames=args.max_missing_frames,
+        patch_size=args.patch_size,
     )
-    print(f"Saved to {out}")
-
-
-if __name__ == "__main__":
-    run()

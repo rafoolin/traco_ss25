@@ -101,7 +101,7 @@ def run(
     if os.path.exists(frame_dir_path):
         logger.info("Frame directory already exists. Skipping extraction.")
     else:
-        extract_frames(video_path=video_dir, output_dir=frame_dir_path)
+        extract_frames(video_dir=video_dir, output_dir=frame_dir_path)
         logger.info("Frames extracted successfully!")
     # Step 2: Run bounding box script for body detection
     logger.info("Running bounding box script for body & head detection...")

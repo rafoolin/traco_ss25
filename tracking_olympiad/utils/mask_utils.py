@@ -1,4 +1,3 @@
-
 import numpy as np
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
@@ -17,13 +16,26 @@ def _get_center_points(hexbug_points: list) -> np.ndarray:
     return np.array([[point["x"], point["y"]] for point in hexbug_points])
 
 
-
 def get_frame_masks(
     csv_data: dict,
     frame_index: int,
     sam2_predictor: SAM2ImagePredictor,
 ) -> list:
-    """Retrieves masks for a specific frame using the SAM2 predictor."""
+    """
+    Generates object masks for a specific frame using the SAM2 predictor.
+
+    Args:
+        csv_data (dict): Frame data mapping frame indices to object detection info.
+        frame_index (int): Index of the frame to process.
+        sam2_predictor (SAM2ImagePredictor): SAM2 predictor instance for mask generation.
+
+    Returns:
+        list: List of dictionaries, each containing:
+            - "bbox": Bounding box ((x_min, y_min), (x_max, y_max)) from mask.
+            - "x" (float): Center x-coordinate of the object.
+            - "y" (float): Center y-coordinate of the object.
+            - "hexbug" (int/str): Hexbug identifier.
+    """
     hexbug_points = _get_hexbug_points(csv_data[frame_index])
     center_points = _get_center_points(hexbug_points)
     # SAM
@@ -50,14 +62,13 @@ def get_frame_masks(
 
 def get_mask_bounding_box(mask: np.ndarray) -> tuple:
     """
-    Calculates the bounding box coordinates of the non-zero region in a binary mask.
+    Finds the bounding box of the non-zero region in a binary mask.
 
     Args:
-        mask (np.ndarray): A binary mask array where non-zero values indicate the region of interest.
+        mask (np.ndarray): Binary mask with non-zero values for the object region.
 
     Returns:
-        tuple: A tuple containing two tuples ((x_min, y_min), (x_max, y_max)) representing the top-left and bottom-right
-            coordinates of the bounding box. Returns None if the mask contains no non-zero elements.
+        tuple: ((x_min, y_min), (x_max, y_max)) bounding box coordinates, or None if empty.
     """
     ys, xs = np.where(np.squeeze(mask))
     if ys.size == 0 or xs.size == 0:
@@ -69,8 +80,15 @@ def get_mask_bounding_box(mask: np.ndarray) -> tuple:
 
 def extract_xy(boxes, keypoints, i):
     """
-    Prefer the first keypoint (index 0) if available, otherwise bbox center (xywh).
-    Returns (x, y) as floats.
+    Gets object center coordinates from keypoints if available, otherwise from bbox center.
+
+    Args:
+        boxes: YOLO detection boxes object.
+        keypoints: YOLO detection keypoints object.
+        i (int): Index of the object.
+
+    Returns:
+        tuple: (x, y) coordinates as floats.
     """
     if keypoints is not None and getattr(keypoints, "xy", None) is not None:
         k = keypoints.xy[i]

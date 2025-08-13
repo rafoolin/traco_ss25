@@ -7,7 +7,18 @@ logger = setup_logger()
 
 
 def get_yolo_labels_body(mask_dict, image_size, frame_index):
-    """Generates YOLO format labels for body masks."""
+    """
+    Generates YOLO-format labels for a body mask.
+
+    Args:
+        mask_dict (dict): Dictionary containing 'bbox', 'x', 'y', and 'hexbug'.
+        image_size (tuple): (width, height) of the image.
+        frame_index (int): Index of the frame.
+
+    Returns:
+        list: YOLO label [frame_index, hexbug_id, bbox_cx, bbox_cy, bbox_w, bbox_h,
+            hexbug_cx, hexbug_cy, 2] or empty list if no bbox.
+    """
 
     bbox = mask_dict["bbox"]
     if bbox is None:
@@ -40,7 +51,22 @@ def get_yolo_labels_body(mask_dict, image_size, frame_index):
 
 
 def get_label_head(csv_data, frame_index, w, h, box_size=100, shift_x=50, shift_y=50):
-    """Generates YOLO format labels for head data."""
+    """
+    Generates YOLO-format labels for a head bounding box.
+
+    Args:
+        csv_data (dict): Dictionary with 'x', 'y', and 'hexbug' for the detection.
+        frame_index (int): Index of the frame.
+        w (int): Image width.
+        h (int): Image height.
+        box_size (int, optional): Size of the bounding box in pixels. Defaults to 100.
+        shift_x (int, optional): Horizontal offset for box center. Defaults to 50.
+        shift_y (int, optional): Vertical offset for box center. Defaults to 50.
+
+    Returns:
+        list: YOLO label [frame_index, hexbug_id, bbox_cx, bbox_cy, bbox_w, bbox_h,
+            hexbug_cx, hexbug_cy, 2] or empty list if no data.
+    """
     if len(csv_data) == 0:
         return []
 
@@ -78,13 +104,15 @@ def get_label_head(csv_data, frame_index, w, h, box_size=100, shift_x=50, shift_
 
 def save_yolo_labels(yolo_data: list, video_name: str, label_path: str):
     """
-    Saves YOLO formatted labels to a text file.
+    Saves YOLO-formatted labels for a video to a text file.
 
     Args:
-        yolo_data (list): List of YOLO formatted data.
-        video_name (str): Name of the video for which labels are being saved.
-        label_path (str): Path to the directory where the label file will be saved.
+        yolo_data (list): List of YOLO label rows, where each row is
+            [frame_index, hexbug_id, bbox_cx, bbox_cy, bbox_w, bbox_h, hexbug_cx, hexbug_cy, 2].
+        video_name (str): Name of the video (used for the label filename).
+        label_path (str): Directory where the label file will be saved.
     """
+
     yolo_label_path = os.path.join(label_path, f"{video_name}.txt")
     with open(yolo_label_path, "w", encoding="utf-8") as f:
         for row in yolo_data:

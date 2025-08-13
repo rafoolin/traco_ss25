@@ -66,7 +66,7 @@ class BoundingBox:
         """
         # Walk through video directories
         all_videos = sorted(os.listdir(self.frame_dir_path))
-        for video_name in ["training020"]:
+        for video_name in all_videos:
             logger.info("Processing video: %s", video_name)
             frame_path = os.path.join(self.frame_dir_path, video_name)
             csv_path = os.path.join(self.csv_dir_path, f"{video_name}.csv")

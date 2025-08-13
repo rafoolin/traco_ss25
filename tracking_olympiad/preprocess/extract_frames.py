@@ -2,26 +2,32 @@ import cv2
 import os
 
 from utils.file_utils import mkdir_safe
+from utils.logger import setup_logger
+from utils.media import open_video
+
+logger = setup_logger()
 
 
-def extract_frames(video_path, output_dir):
+def extract_frames(video_dir, output_dir):
     """
-    Extract frames from a video file and save them as images.
+    Extracts frames from all `.mp4` videos in a directory and saves them as image files.
 
-    :param video_dir: Path to the directory containing video files.
-    :param output_dir: Folder where extracted frames will be saved.
+    Args:
+        video_dir (str): Path to the directory containing `.mp4` video files.
+        output_dir (str): Path to the directory where extracted frames will be saved.
+            Frames are stored in subfolders named after each video (without extension).
     """
     mkdir_safe(output_dir)
-    for filename in os.listdir(video_path):
+    for filename in os.listdir(video_dir):
         if not filename.endswith(".mp4"):
             continue
 
-        video_path = os.path.join(video_path, filename)
+        video_path = os.path.join(video_dir, filename)
         name = os.path.splitext(filename)[0]
         save_path = os.path.join(output_dir, name)
         mkdir_safe(save_path)
 
-        cap = cv2.VideoCapture(video_path)
+        cap = open_video(video_path)
         frame_num = 0
         success, frame = cap.read()
 
@@ -32,5 +38,4 @@ def extract_frames(video_path, output_dir):
             success, frame = cap.read()
 
         cap.release()
-        print(f"Extracted {frame_num} frames from {filename}")
-
+        logger.info("Extracted %s frames from %s", frame_num, filename)

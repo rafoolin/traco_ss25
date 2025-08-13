@@ -147,8 +147,21 @@ def detect_hexbugs_head(
     fallback_thresh: float = 0.45,
     annotate_results: bool = False,
 ):
-    """Detect hexbug heads in a video using YOLO models.
-    Saves results to a CSV file in the specified output directory.
+    """
+    Detects Hexbug head positions in a video using primary and optional fallback YOLO models.
+
+    Args:
+        video_path (str): Path to the input video file.
+        primary_model_path (str): Path to the primary YOLO model file.
+        csv_out_dir (str): Directory to save the detection results CSV.
+        annotate_dir (str): Directory to save annotated detection images.
+        primary_thresh (float, optional): Confidence threshold for primary model detections.
+        Default is 0.55.
+        fallback_model_path (str, optional): Path to the fallback YOLO model file. Default is None.
+        fallback_thresh (float, optional): Confidence threshold for fallback model detections.
+        Default is 0.45.
+        annotate_results (bool, optional): Whether to save annotated detection images. Default is False.
+
     """
     primary = YOLO(primary_model_path)
     fallback = YOLO(fallback_model_path)

@@ -21,6 +21,15 @@ class ColorFormatter(logging.Formatter):
 
 
 def setup_logger(level=logging.INFO) -> logging.Logger:
+    """
+    Sets up and returns a logger with colored console output.
+
+    Args:
+        level (int, optional): Logging level (default: logging.INFO).
+
+    Returns:
+        logging.Logger: Configured logger instance.
+    """
     logger = logging.getLogger("tracker_logger")
     logger.setLevel(level)
     logger.propagate = False
