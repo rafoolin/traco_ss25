@@ -15,10 +15,10 @@ logger = setup_logger()
 class TrackerConfig:
     def __init__(
         self,
-        patch_size=50,
-        distance_weight=1.0,
+        patch_size=250,
+        distance_weight=0.7,
         color_weight=0.1,
-        max_cost=200.0,
+        max_cost=300.0,
         max_missing_frames=3,
         max_ids=11,
     ):

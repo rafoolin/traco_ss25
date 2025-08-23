@@ -119,8 +119,8 @@ python tracking_olympiad/detector.py \
 --video_path "./traco_2024/leaderboard_data/test001.mp4" \
 --primary_model_path "./yolo_dataset/runs/pose/body_train/weights/best.pt" \
 --fallback_model_path "./yolo_dataset/runs/pose/head_train/weights/best.pt" \
---primary_thresh 0.5 \
---fallback_thresh 0.5 \
+--primary_thresh 0.40 \
+--fallback_thresh 0.42 \
 --csv_out_dir "./output/detector_csv_files" \
 --annotate_results \
 --annotate_dir "./output/annotations"
@@ -158,10 +158,10 @@ python ./tracking_olympiad/tracker.py \
 --video_path ./traco_2024/leaderboard_data/test001.mp4 \
 --csv_in ./output/detector_csv_files/predicted_test001.csv \
 --csv_out output/detector_csv_files/predicted_test001_ids.csv \
---patch_size 50 \
---distance_weight 1.0 \
+--patch_size 250 \
+--distance_weight 0.7 \
 --color_weight 0.1 \
---max_cost 200 \
+--max_cost 300.0 \
 --max_missing_frames 3 \
 --max_ids 3
 ```
@@ -180,12 +180,25 @@ I experimented with both my custom tracker (based on Hungarian matching with pos
 **Recommendation:**  
 If you plan to build upon this repository, consider replacing or improving the tracking stage with a more advanced, competition-ready tracker.
 
+## Note
+
+You can modify the tracking parameters (e.g., `patch_size`, `distance_weight`, `color_weight`) in the `tracker.py` script to better suit your specific video and detection characteristics. This is also true for training parameters in `train.py`.
+
 ## 📌 Full Pipeline
 
 1. **Setup** → `bash run.sh`
 2. **Train models** → `train.py`
 3. **Detect** → `detector.py`
 4. **Track / Assign IDs** → `tracker.py`
+
+## 📝 Annotate Results
+
+```bash
+python scripts/annotate_result.py \
+--video_path ./traco_2024/leaderboard_data/test001.mp4 \
+--csv_path output/detector_csv_files/predicted_test001_ids.csv \
+--output_dir output/cvs_annotations
+```
 
 ## 📚 References
 
