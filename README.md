@@ -7,6 +7,18 @@ This project is part of the [Tracking Olympiad seminar](https://traco.anki.xyz/)
 This repository contains the full pipeline for detecting and tracking multiple Hexbugs in videos.  
 The process is split into **modular steps** so you can run or debug each stage independently.
 
+## Implementation Details
+
+Training and evaluation were performed on the **tinyGPU FAU HPC cluster** using an NVIDIA A100-SXM4-40GB GPU with Slurm job scheduling.  
+
+### Hardware
+
+- GPU: NVIDIA A100-SXM4-40GB  
+- Runtime (body model): ~3h 45m  
+- Runtime (head model): ~2h 20m  
+- Max GPU memory usage: 11 GB (body), 2 GB (head)  
+- System RAM usage: up to 19 GB  
+
 ## 📂 Dataset
 
 The dataset contains video frames and their corresponding annotations in CSV format from [traco_2024](https://github.com/ankilab/traco_2024) repository.
