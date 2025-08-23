@@ -10,3 +10,5 @@ yolo_dataset/*.pt
 
 # Output directories
 output
+
+.DS_Store
