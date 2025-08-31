@@ -66,8 +66,6 @@ This script will:
 2. **Create & activate** the conda environment.
 3. **Install** all Python dependencies from `requirements.txt`.
 4. **Download & install** the SAM2 model(For segmentation in order to detect bounding box around HexBugs).
-5. **Extract frames** from training videos.
-6. **Prepare** the YOLO images and labels datasets.
 
 After this, you are ready for training or detection.
 
